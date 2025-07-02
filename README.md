@@ -87,6 +87,10 @@ http://localhost:5000/api/events
 
 ### License
 This project is open-source and available under the MIT License.
+
+### Contributing to this project
+Thank you for your interest in contributing! Here are some basic instructions on how to add or update the README file.
+
 ```bash
 
 ---
