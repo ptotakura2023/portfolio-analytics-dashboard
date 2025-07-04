@@ -1,7 +1,22 @@
 import React, { useEffect, useState } from "react";
 import { fetchEvents } from "../services/api";
 import EventBarChart from "../charts/EventBarChart";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import "./DashboardPage.css";
+
+// Helper to extract ISO string from timestamp
+function getEventDateString(e) {
+  const rawTimestamp = typeof e.timestamp === "string"
+    ? e.timestamp
+    : (e.timestamp && e.timestamp.$date)
+      ? e.timestamp.$date
+      : null;
+  if (!rawTimestamp) return null;
+  const dateObj = new Date(rawTimestamp);
+  if (isNaN(dateObj.getTime())) return null;
+  return dateObj.toISOString().slice(0, 10);
+}
 
 export default function DashboardPage() {
   const [events, setEvents] = useState([]);
@@ -14,11 +29,8 @@ export default function DashboardPage() {
     fetchEvents()
       .then((res) => {
         const data = res.data || res;
-        console.log("Fetched events timestamps:", data.map(e => e.timestamp));
-        const uniqueDates = [...new Set(data.map(e => {
-          const d = new Date(e.timestamp);
-          return isNaN(d.getTime()) ? null : d.toISOString().slice(0, 10);
-        }))].filter(Boolean);
+        console.log("Fetched events timestamps:", data.map(e => getEventDateString(e)));
+        const uniqueDates = [...new Set(data.map(e => getEventDateString(e)))].filter(Boolean);
         console.log("Unique event dates:", uniqueDates);
         setEvents(data);
       })
@@ -32,19 +44,8 @@ export default function DashboardPage() {
   const filteredEvents = events.filter((e) => {
     if (!startDate && !endDate) return true;
 
-    console.log("Event timestamp:", e.timestamp);
-
-    let eventDateStr = "";
-    try {
-      const dateObj = new Date(e.timestamp);
-      if (!isNaN(dateObj.getTime())) {
-        eventDateStr = dateObj.toISOString().slice(0, 10);
-      } else {
-        return false; // Skip invalid date
-      }
-    } catch {
-      return false; // Skip malformed date
-    }
+    const eventDateStr = getEventDateString(e);
+    if (!eventDateStr) return false;
 
     if (startDate && eventDateStr < startDate) return false;
     if (endDate && eventDateStr > endDate) return false;
@@ -70,11 +71,9 @@ export default function DashboardPage() {
     return acc;
   }, {});
 
+  // Get all valid event dates for min/max
   const eventDates = events
-    .map(e => {
-      const d = new Date(e.timestamp);
-      return isNaN(d.getTime()) ? null : d.toISOString().slice(0, 10);
-    })
+    .map(getEventDateString)
     .filter(Boolean);
   const minDate = eventDates.length ? eventDates.reduce((a, b) => a < b ? a : b) : "";
   const maxDate = eventDates.length ? eventDates.reduce((a, b) => a > b ? a : b) : "";
@@ -86,26 +85,33 @@ export default function DashboardPage() {
       <div className="filter-row">
         <div className="filter-group">
           <label>Start Date:</label>
-          <input
-            type="date"
-            value={startDate}
-            min={minDate}
-            max={maxDate}
-            onChange={(e) => setStartDate(e.target.value)}
+          <DatePicker
+            selected={startDate ? new Date(startDate) : null}
+            onChange={date => setStartDate(date ? date.toISOString().slice(0, 10) : "")}
+            dateFormat="yyyy-MM-dd"
+            minDate={minDate ? new Date(minDate) : null}
+            maxDate={maxDate ? new Date(maxDate) : null}
+            placeholderText="yyyy-mm-dd"
+            isClearable
           />
         </div>
 
         <div className="filter-group">
           <label>End Date:</label>
-          <input
-            type="date"
-            value={endDate}
-            min={minDate}
-            max={maxDate}
-            onChange={(e) => setEndDate(e.target.value)}
+          <DatePicker
+            selected={endDate ? new Date(endDate) : null}
+            onChange={date => setEndDate(date ? date.toISOString().slice(0, 10) : "")}
+            dateFormat="yyyy-MM-dd"
+            minDate={minDate ? new Date(minDate) : null}
+            maxDate={maxDate ? new Date(maxDate) : null}
+            placeholderText="yyyy-mm-dd"
+            isClearable
           />
         </div>
       </div>
+      <p style={{ textAlign: 'center', color: '#6b7280', fontSize: '0.95rem', marginBottom: '1.5rem' }}>
+        <strong>Note:</strong> Please use the date picker (calendar icon) to select dates. Manually typing dates may not work due to browser locale settings.
+      </p>
 
       {loading ? (
         <p className="loading-text">Loading...</p>
