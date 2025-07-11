@@ -89,22 +89,10 @@ http://localhost:5000/api/events
 This project is open-source and available under the MIT License.
 
 ### Contributing to this project
-Thank you for your interest in contributing! Here are some basic instructions on how to add or update the README file.
+Contributions are always welcome.
+Open issues or PRs for feature suggestions or bugs.
 
-```bash
 
----
-
-### How to add this to your repo:
-
-1. In your project root, create a file called `README.md` (if not already present).  
-2. Copy-paste the above markdown content into that file and save it.  
-3. Commit and push:
-
-```bash
-git add README.md
-git commit -m "Add README with project overview and setup instructions"
-git push origin main
 
 
 
