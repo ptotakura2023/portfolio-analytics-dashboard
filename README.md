@@ -90,6 +90,7 @@ This project is open-source and available under the MIT License.
 
 ### Contributing to this project
 Contributions are always welcome.
+
 Open issues or PRs for feature suggestions or bugs.
 
 
